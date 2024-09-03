@@ -57,8 +57,6 @@ import qualified Data.Swagger                       as Swagger
 import qualified Data.Swagger.Internal.Schema       as Swagger
 import qualified Data.Text                          as T
 import qualified Data.Text.Encoding                 as TE
-import qualified Database.PostgreSQL.Simple         as PQ
-import qualified Database.PostgreSQL.Simple.ToField as PQ
 import qualified PlutusLedgerApi.V1                 as PlutusV1 (TxId (..))
 import qualified PlutusLedgerApi.V3                 as PlutusV3 (TxId (..))
 import qualified PlutusTx.Builtins.Internal         as Plutus
@@ -183,9 +181,6 @@ data PlutusTxId (v :: PlutusVersion) where
 newtype GYTxId = GYTxId Api.TxId
     deriving (Eq, Ord)
     deriving newtype (FromJSON)  -- TODO: Also derive ToJSON?
-
-instance PQ.ToField GYTxId where
-    toField (GYTxId txId) = PQ.toField (PQ.Binary (Api.serialiseToRawBytes txId))
 
 -- |
 --

@@ -71,10 +71,6 @@ import qualified Data.Text                            as Text
 import qualified Data.Text.Encoding                   as TE
 import qualified Data.Vector                          as Vector
 import           Data.Word                            (Word64)
-import qualified Database.PostgreSQL.Simple           as PQ
-import qualified Database.PostgreSQL.Simple.FromField as PQ (FromField (..),
-                                                             returnError)
-import qualified Database.PostgreSQL.Simple.ToField   as PQ
 import qualified PlutusLedgerApi.V1.Address           as Plutus
 import qualified PlutusLedgerApi.V1.Credential        as Plutus
 import qualified PlutusLedgerApi.V1.Crypto            as Plutus
@@ -547,16 +543,6 @@ instance FromJSON GYAddressBech32 where
             Just addr -> return $ GYAddressBech32 $ GYAddress addr
             Nothing   -> fail "cannot deserialise address"
 
-instance PQ.ToField GYAddressBech32 where
-    toField (GYAddressBech32 addr) = PQ.toField $ addressToText addr
-
-instance PQ.FromField GYAddressBech32 where
-    fromField f bs = do
-        t <- PQ.fromField f bs
-        case Api.deserialiseAddress Api.AsAddressAny t of
-            Just addr -> return $ GYAddressBech32 $ GYAddress addr
-            Nothing   -> PQ.returnError PQ.ConversionFailed f "address does not unserialise"
-
 
 -------------------------------------------------------------------------------
 -- swagger schema
@@ -814,16 +800,6 @@ instance FromJSON GYStakeAddressBech32 where
         case stakeAddressFromTextMaybe t of
             Just stakeAddr -> return $ GYStakeAddressBech32 stakeAddr
             Nothing        -> fail "cannot deserialise stake address"
-
-instance PQ.ToField GYStakeAddressBech32 where
-    toField (GYStakeAddressBech32 stakeAddr) = PQ.toField $ stakeAddressToText stakeAddr
-
-instance PQ.FromField GYStakeAddressBech32 where
-    fromField f bs = do
-        t <- PQ.fromField f bs
-        case stakeAddressFromTextMaybe t of
-            Just stakeAddr -> return $ GYStakeAddressBech32 stakeAddr
-            Nothing   -> PQ.returnError PQ.ConversionFailed f "stake address does not unserialise"
 
 
 -------------------------------------------------------------------------------

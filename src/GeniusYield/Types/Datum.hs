@@ -40,10 +40,6 @@ import qualified Data.ByteString.Base16               as Base16
 import qualified Data.ByteString.Char8                as BS8
 import           Data.Either.Combinators              (mapLeft)
 import qualified Data.Text                            as Txt
-import qualified Database.PostgreSQL.Simple           as PQ
-import qualified Database.PostgreSQL.Simple.FromField as PQ (FromField (..),
-                                                             returnError)
-import qualified Database.PostgreSQL.Simple.ToField   as PQ
 import qualified PlutusLedgerApi.V1.Scripts           as Plutus
 import qualified PlutusTx
 import qualified PlutusTx.Builtins                    as PlutusTx
@@ -148,15 +144,6 @@ instance Web.ToHttpApiData GYDatumHash where
 instance IsString GYDatumHash where
     fromString = unsafeDatumHashFromPlutus . fromString
 
-instance PQ.FromField GYDatumHash where
-    fromField f bs' = do
-        PQ.Binary bs <- PQ.fromField f bs'
-        case Api.deserialiseFromRawBytes (Api.AsHash Api.AsScriptData) bs of
-            Right dh -> return (datumHashFromApi dh)
-            Left e -> PQ.returnError PQ.ConversionFailed f ("datum hash does not unserialise: " <> show e)
-
-instance PQ.ToField GYDatumHash where
-    toField (GYDatumHash dh) = PQ.toField (PQ.Binary (Api.serialiseToRawBytes dh))
 
 datumHashFromHex :: String -> Maybe GYDatumHash
 datumHashFromHex = rightToMaybe . datumHashFromHexE
